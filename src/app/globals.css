@@ -1,0 +1,49 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap");
+
+:root {
+  --ink: #1a2330;
+  --muted: #5c6b7a;
+  --surface: #ffffff;
+  --bg: #e8eef3;
+  --bg-accent: #d4e0ea;
+  --border: #c5d0db;
+  --accent: #1f6b8a;
+  --accent-hover: #185870;
+  --success: #2d7a4f;
+  --danger: #b33b3b;
+  --flag: #c47a1a;
+  --font-sans: "IBM Plex Sans", "Segoe UI", sans-serif;
+  --font-display: "Fraunces", Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--ink);
+  background:
+    radial-gradient(ellipse 90% 60% at 10% -10%, var(--bg-accent), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 100% 0%, #cfdce8, transparent 50%),
+    var(--bg);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--accent);
+}
+
+button,
+input {
+  font-family: inherit;
+}
