@@ -47,6 +47,20 @@
   color: var(--ink);
 }
 
+.figure {
+  width: 100%;
+  max-width: 420px;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.figure svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 420px;
+}
+
 .options {
   border: none;
   margin: 0;

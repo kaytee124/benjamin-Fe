@@ -12,3 +12,4 @@ export const SUBJECTS: SubjectMeta[] = [MATH_SUBJECT];
 
 export const STORAGE_KEY = "ged-math-attempt-v1";
 export const RESULTS_KEY = "ged-math-results-v1";
+export const STUDENT_ID_KEY = "ged-math-student-id-v1";

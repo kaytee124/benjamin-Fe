@@ -39,6 +39,13 @@ export function QuestionPanel({
 
       <p className={styles.prompt}>{question.prompt}</p>
 
+      {question.figureSvg ? (
+        <div
+          className={styles.figure}
+          dangerouslySetInnerHTML={{ __html: question.figureSvg }}
+        />
+      ) : null}
+
       {question.type === "multiple_choice" && question.options ? (
         <fieldset className={styles.options}>
           <legend className={styles.srOnly}>Answer choices</legend>

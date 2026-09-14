@@ -68,7 +68,38 @@
 }
 
 .ctaRow {
+  margin-top: 1.25rem;
+}
+
+.practiceLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
   margin-top: 1.5rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.practiceInput {
+  font-size: 1.05rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg, #fff);
+  color: var(--ink);
+}
+
+.practiceHint {
+  margin: 0.45rem 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.idError {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: #b42318;
 }
 
 .cta {
@@ -92,6 +123,17 @@
   font-size: 0.85rem;
   color: var(--muted);
   line-height: 1.45;
+}
+
+.coachLink {
+  margin: 1rem 0 0;
+  font-size: 0.8rem;
+}
+
+.coachLink a {
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 @media (max-width: 520px) {

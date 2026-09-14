@@ -1,30 +1,35 @@
 # benjamin-Fe
 
-Next.js frontend for the GED Math practice test. Talks to **benjamin-be** for questions and scoring.
+Next.js frontend for the GED Math practice test. Talks to **benjamin-be** for unique question sessions, scoring, and coach analytics.
 
 ## Setup
 
 ```bash
 npm install
-cp .env.local.example .env.local
 npm run dev
 ```
 
 App: [http://localhost:3000](http://localhost:3000)  
-API: hardcoded to [https://benjamin-be-2.onrender.com](https://benjamin-be-2.onrender.com) in `src/lib/api.ts`.
+Coach: [http://localhost:3000/coach](http://localhost:3000/coach)
 
-## Env
+On **localhost**, the FE calls `http://localhost:4000`.  
+On **Vercel**, it calls `https://benjamin-be-2.onrender.com`.
 
-No env required for the API URL right now (hardcoded). On Render, set `CORS_ORIGIN` to your Vercel/local frontend origin so the browser can call the API.
+## Test flow
 
-### Deploy on Vercel
+1. Start → `POST /api/subjects/math/sessions` (fresh 46-question form).
+2. `sessionId` is saved in localStorage with answers/timer state.
+3. Refresh resumes the same session via `GET /sessions/:id`.
+4. Submit sends `sessionId` + answers for server-side scoring.
 
-1. Import the `benjamin-Fe` GitHub repo.
-2. Redeploy after pulling the hardcoded API base.
-3. On Render, set `CORS_ORIGIN` to this Vercel URL (e.g. `https://benjamin-fe.vercel.app`).
+## Coach review
+
+Passcode-gated dashboard at `/coach`. Shows score history and flagged weak topics (statistical rules, no LLM). Requires backend `COACH_PASSCODE` + `DATABASE_URL`.
+
 ## Features
 
-- 46-question Math practice UI with 115-minute timer
-- Previous / Next navigation (no question grid)
+- Unique generated question set each attempt (parametric templates, no LLM)
+- 115-minute timer, Previous / Next navigation
 - Calculator disabled on questions 1–5
-- Results and review after submit
+- Results review after submit
+- Coach topic-weakness dashboard

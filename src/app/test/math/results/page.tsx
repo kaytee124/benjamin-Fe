@@ -99,6 +99,12 @@ export default function MathResultsPage() {
                 ) : null}
               </div>
               <p className={styles.prompt}>{item.prompt}</p>
+              {item.figureSvg ? (
+                <div
+                  className={styles.figure}
+                  dangerouslySetInnerHTML={{ __html: item.figureSvg }}
+                />
+              ) : null}
               <dl className={styles.answers}>
                 <div>
                   <dt>Your answer</dt>

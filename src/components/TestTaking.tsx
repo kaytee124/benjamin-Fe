@@ -11,6 +11,7 @@ import { MATH_SUBJECT } from "@/lib/constants";
 import {
   clearAttempt,
   loadAttempt,
+  loadStudentId,
   remainingMs,
   saveAttempt,
   saveResults,
@@ -22,6 +23,8 @@ import styles from "./TestTaking.module.css";
 export function TestTaking() {
   const router = useRouter();
   const [questions, setQuestions] = useState<PublicQuestion[]>([]);
+  const [sessionId, setSessionId] = useState<string>("");
+  const [studentId, setStudentId] = useState<string>("");
   const [loadError, setLoadError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const [startedAt, setStartedAt] = useState<string>("");
@@ -37,15 +40,92 @@ export function TestTaking() {
 
   useEffect(() => {
     let cancelled = false;
+
     (async () => {
       try {
-        const res = await fetch(
-          `${getApiBase()}/api/subjects/math/questions`
-        );
-        if (!res.ok) throw new Error("Could not load questions from API.");
-        const data = (await res.json()) as { questions: PublicQuestion[] };
+        const sid = loadStudentId();
+        if (!sid) {
+          if (!cancelled) {
+            setLoadError(
+              "Enter a practice name or ID on the home screen before starting."
+            );
+          }
+          return;
+        }
         if (cancelled) return;
+        setStudentId(sid);
+
+        const existing = loadAttempt();
+
+        if (existing?.sessionId && existing.studentId === sid) {
+          const res = await fetch(
+            `${getApiBase()}/api/subjects/math/sessions/${existing.sessionId}`
+          );
+          if (res.ok) {
+            const data = (await res.json()) as {
+              sessionId: string;
+              studentId?: string;
+              questions: PublicQuestion[];
+            };
+            if (cancelled) return;
+            setSessionId(data.sessionId);
+            setQuestions(data.questions ?? []);
+            setStartedAt(existing.startedAt);
+            setAnswers(existing.answers ?? {});
+            setFlagged(existing.flagged ?? []);
+            setCurrentIndex(
+              Math.min(
+                existing.currentIndex ?? 0,
+                (data.questions?.length ?? 1) - 1
+              )
+            );
+            setRemaining(
+              remainingMs(existing.startedAt, MATH_SUBJECT.timeLimitMinutes)
+            );
+            setReady(true);
+            return;
+          }
+          // Session expired — start a fresh one below
+          clearAttempt();
+        } else if (existing) {
+          // Different student or missing studentId on old attempt
+          clearAttempt();
+        }
+
+        const res = await fetch(`${getApiBase()}/api/subjects/math/sessions`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ studentId: sid }),
+        });
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(
+            typeof body.error === "string"
+              ? body.error
+              : "Could not create a new test session."
+          );
+        }
+        const data = (await res.json()) as {
+          sessionId: string;
+          questions: PublicQuestion[];
+        };
+        if (cancelled) return;
+
+        const now = new Date().toISOString();
+        const initial: AttemptState = {
+          startedAt: now,
+          sessionId: data.sessionId,
+          studentId: sid,
+          answers: {},
+          flagged: [],
+          currentIndex: 0,
+          questions: data.questions,
+        };
+        saveAttempt(initial);
+        setSessionId(data.sessionId);
         setQuestions(data.questions ?? []);
+        setStartedAt(now);
+        setReady(true);
       } catch (e) {
         if (!cancelled) {
           setLoadError(
@@ -56,58 +136,49 @@ export function TestTaking() {
         }
       }
     })();
+
     return () => {
       cancelled = true;
     };
   }, []);
 
   useEffect(() => {
-    if (questions.length === 0) return;
-
-    const existing = loadAttempt();
-    if (existing?.startedAt) {
-      const left = remainingMs(
-        existing.startedAt,
-        MATH_SUBJECT.timeLimitMinutes
-      );
-      setStartedAt(existing.startedAt);
-      setAnswers(existing.answers ?? {});
-      setFlagged(existing.flagged ?? []);
-      setCurrentIndex(
-        Math.min(existing.currentIndex ?? 0, questions.length - 1)
-      );
-      setRemaining(Math.max(0, left));
-    } else {
-      const now = new Date().toISOString();
-      const initial: AttemptState = {
-        startedAt: now,
-        answers: {},
-        flagged: [],
-        currentIndex: 0,
-      };
-      saveAttempt(initial);
-      setStartedAt(now);
-    }
-    setReady(true);
-  }, [questions]);
-
-  useEffect(() => {
-    if (!ready || !startedAt) return;
+    if (!ready || !startedAt || !sessionId || !studentId) return;
     saveAttempt({
       startedAt,
+      sessionId,
+      studentId,
       answers,
       flagged,
       currentIndex,
+      questions,
     });
-  }, [ready, startedAt, answers, flagged, currentIndex]);
+  }, [
+    ready,
+    startedAt,
+    sessionId,
+    studentId,
+    answers,
+    flagged,
+    currentIndex,
+    questions,
+  ]);
 
   const handleSubmit = useCallback(async () => {
-    if (submittingRef.current || questions.length === 0) return;
+    if (
+      submittingRef.current ||
+      questions.length === 0 ||
+      !sessionId ||
+      !studentId
+    )
+      return;
     submittingRef.current = true;
     setSubmitting(true);
     setError(null);
 
     const payload = {
+      sessionId,
+      studentId,
       startedAt,
       submittedAt: new Date().toISOString(),
       answers: questions.map((q) => ({
@@ -123,7 +194,12 @@ export function TestTaking() {
         body: JSON.stringify(payload),
       });
       if (!res.ok) {
-        throw new Error("Scoring failed. Please try again.");
+        const body = await res.json().catch(() => ({}));
+        throw new Error(
+          typeof body.error === "string"
+            ? body.error
+            : "Scoring failed. Please try again."
+        );
       }
       const data = (await res.json()) as SubmitResponse;
       saveResults(data);
@@ -134,7 +210,7 @@ export function TestTaking() {
       setSubmitting(false);
       setError(e instanceof Error ? e.message : "Submission failed");
     }
-  }, [answers, questions, router, startedAt]);
+  }, [answers, questions, router, sessionId, startedAt, studentId]);
 
   useEffect(() => {
     if (!ready || !startedAt) return;
@@ -158,15 +234,15 @@ export function TestTaking() {
         {loadError}
         <br />
         <span className={styles.hint}>
-          Start the API with <code>npm run dev</code> in <code>backend/</code>{" "}
-          (port 4000).
+          <a href="/">Return home</a> to enter a practice ID, or start the API
+          with <code>npm run dev</code> in <code>backend/</code> (port 4000).
         </span>
       </p>
     );
   }
 
   if (!ready || questions.length === 0) {
-    return <p className={styles.loading}>Loading test…</p>;
+    return <p className={styles.loading}>Preparing a new question set…</p>;
   }
 
   const question = questions[currentIndex];
@@ -192,7 +268,7 @@ export function TestTaking() {
         <div>
           <p className={styles.subject}>{MATH_SUBJECT.name}</p>
           <p className={styles.sub}>
-            Practice test · {questions.length} questions
+            Practice test · {questions.length} questions · unique form
           </p>
         </div>
         <Timer remainingMs={remaining} />

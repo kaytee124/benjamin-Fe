@@ -18,6 +18,8 @@ export interface Question {
   explanation?: string;
   topic?: string;
   calculatorAllowed: boolean;
+  /** Trusted server-generated SVG markup for diagrams. */
+  figureSvg?: string;
 }
 
 /** Question payload sent to the client (no answer key). */
@@ -32,6 +34,8 @@ export interface SubmitRequest {
   answers: StudentAnswer[];
   startedAt: string;
   submittedAt?: string;
+  sessionId?: string;
+  studentId?: string;
 }
 
 export type PracticeBand = "Below practice threshold" | "Practice passing" | "Strong";
@@ -46,6 +50,7 @@ export interface QuestionReview {
   isCorrect: boolean;
   explanation?: string;
   topic?: string;
+  figureSvg?: string;
 }
 
 export interface SubmitResponse {
