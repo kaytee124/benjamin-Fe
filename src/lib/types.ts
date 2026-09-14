@@ -62,3 +62,15 @@ export interface SubmitResponse {
   practiceBand: PracticeBand;
   review: QuestionReview[];
 }
+
+/** One completed practice sitting (from API history). */
+export interface AttemptSummary {
+  id: string;
+  studentId: string;
+  startedAt: string | null;
+  submittedAt: string;
+  correct: number;
+  total: number;
+  percentage: number;
+  practiceBand: string;
+}

@@ -87,6 +87,24 @@ export default function Home() {
           <button type="button" className={styles.cta} onClick={startTest}>
             Start Math practice test
           </button>
+          <button
+            type="button"
+            className={styles.secondaryCta}
+            onClick={() => {
+              const id = normalizeStudentId(practiceId);
+              if (!id) {
+                setIdError(
+                  "Enter a practice name or ID (letters, numbers, - or _)."
+                );
+                return;
+              }
+              saveStudentId(id);
+              setIdError(null);
+              router.push("/history");
+            }}
+          >
+            View my test history
+          </button>
         </div>
 
         <p className={styles.note}>
@@ -94,6 +112,8 @@ export default function Home() {
           scaled score. Answers are graded only after you submit.
         </p>
         <p className={styles.coachLink}>
+          <a href="/history">Test history</a>
+          {" · "}
           <a href="/coach">Coach review</a>
         </p>
       </main>

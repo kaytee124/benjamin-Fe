@@ -68,6 +68,9 @@ export default function MathResultsPage() {
         <Link href="/" className={styles.secondary}>
           Home
         </Link>
+        <Link href="/history" className={styles.secondary}>
+          Test history
+        </Link>
         <button
           type="button"
           className={styles.primary}
