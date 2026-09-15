@@ -61,6 +61,8 @@ export interface SubmitResponse {
   };
   practiceBand: PracticeBand;
   review: QuestionReview[];
+  /** Persisted attempt id when history write succeeds. */
+  attemptId?: string;
 }
 
 /** One completed practice sitting (from API history). */

@@ -109,6 +109,7 @@ export default function HistoryPage() {
                     <th>Score</th>
                     <th>%</th>
                     <th>Band</th>
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -120,6 +121,14 @@ export default function HistoryPage() {
                       </td>
                       <td>{a.percentage}%</td>
                       <td>{a.practiceBand}</td>
+                      <td>
+                        <Link
+                          href={`/history/${a.id}`}
+                          className={styles.rowLink}
+                        >
+                          View questions
+                        </Link>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

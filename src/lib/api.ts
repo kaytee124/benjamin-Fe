@@ -1,4 +1,4 @@
-import type { AttemptSummary } from "@/lib/types";
+import type { AttemptSummary, QuestionReview } from "@/lib/types";
 
 /** Production benjamin-be (public for now). */
 export const API_BASE = "https://benjamin-be-2.onrender.com";
@@ -20,6 +20,17 @@ export interface AttemptsResponse {
   attempts: AttemptSummary[];
 }
 
+export interface AttemptDetailResponse {
+  attempt: AttemptSummary;
+  score: {
+    correct: number;
+    total: number;
+    percentage: number;
+  };
+  practiceBand: string;
+  review: QuestionReview[];
+}
+
 /** Load scored test history for a practice ID. */
 export async function fetchAttempts(
   studentId: string
@@ -34,4 +45,21 @@ export async function fetchAttempts(
     );
   }
   return body as AttemptsResponse;
+}
+
+/** Load one past attempt with question review. */
+export async function fetchAttempt(
+  studentId: string,
+  attemptId: string
+): Promise<AttemptDetailResponse> {
+  const res = await fetch(
+    `${getApiBase()}/api/subjects/math/attempts/${encodeURIComponent(attemptId)}?studentId=${encodeURIComponent(studentId)}`
+  );
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(
+      typeof body.error === "string" ? body.error : "Failed to load attempt"
+    );
+  }
+  return body as AttemptDetailResponse;
 }
